@@ -19,20 +19,27 @@ internal sealed class Interval
 
     public bool IsElapsed()
     {
-        if (_stopwatch.Elapsed >= _timeSpan)
+        if (_timeSpan > TimeSpan.Zero)
         {
-            _stopwatch.Restart();
-            return true;
+            if (_stopwatch.Elapsed >= _timeSpan)
+            {
+                _stopwatch.Restart();
+                return true;
+            }
+            return false;
         }
-        return false;
+        return true;
     }
 
     public void WaitToElapse()
     {
-        _spinWait.Reset();
-        while (!IsElapsed())
+        if (_timeSpan > TimeSpan.Zero)
         {
-            _spinWait.SpinOnce(-1);
+            _spinWait.Reset();
+            while (!IsElapsed())
+            {
+                _spinWait.SpinOnce(-1);
+            }
         }
     }
 }

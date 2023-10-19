@@ -12,10 +12,10 @@ internal sealed class UdpSocket : IDisposable
     private readonly Socket _socket;
     private readonly EndPoint _endPoint;
     private long _lastTimestamp;
-    private int _sentPackets;
-    private int _sentPacketPerSecond;
-    private int _sentBytes;
-    private int _sentBytePerSecond;
+    private long _sentPackets;
+    private long _sentPacketPerSecond;
+    private long _sentBytes;
+    private long _sentBytePerSecond;
     private long _totalSentPackets;
     private long _totalSentBytes;
 
@@ -26,9 +26,9 @@ internal sealed class UdpSocket : IDisposable
         _lastTimestamp = Stopwatch.GetTimestamp();
     }
 
-    public int SentPacketPerSecond => Interlocked.CompareExchange(ref _sentPacketPerSecond, 0, 0);
-    public int SentBytePerSecond => Interlocked.CompareExchange(ref _sentBytePerSecond, 0, 0);
-    public int SentMbitPerSecond => SentBytePerSecond / (1000 * 1000) * 8;
+    public long SentPacketPerSecond => Interlocked.CompareExchange(ref _sentPacketPerSecond, 0, 0);
+    public long SentBytePerSecond => Interlocked.CompareExchange(ref _sentBytePerSecond, 0, 0);
+    public long SentMbitPerSecond => SentBytePerSecond / (1000 * 1000) * 8;
     public long TotalSentPackets => Interlocked.CompareExchange(ref _totalSentPackets, 0, 0);
     public long TotalSentBytes => Interlocked.CompareExchange(ref _totalSentBytes, 0, 0);
 
@@ -40,8 +40,8 @@ internal sealed class UdpSocket : IDisposable
     public async ValueTask<int> SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken = default)
     {
         int result = await _socket.SendToAsync(bytes, _endPoint, cancellationToken).ConfigureAwait(false);
-        int sentPackets = Interlocked.Increment(ref _sentPackets);
-        int sentBytes = Interlocked.Add(ref _sentBytes, result);
+        long sentPackets = Interlocked.Increment(ref _sentPackets);
+        long sentBytes = Interlocked.Add(ref _sentBytes, result);
         Interlocked.Increment(ref _totalSentPackets);
         Interlocked.Add(ref _totalSentBytes, result);
         long lastTimestamp = Interlocked.CompareExchange(ref _lastTimestamp, 0, 0);

@@ -50,7 +50,7 @@ internal static class Program
     private static async Task RunAsync(UdpSocket socket, int maxBytePerSecond, StatusContext context)
     {
         context.Refresh();
-        using var packet = PacketGenerator.GenerateRandom(1300);
+        using var packet = PacketGenerator.GenerateRandom(65507);
         int packetPerSecond = maxBytePerSecond / packet.Memory.Length;
         var packetInterval = new Interval(TimeSpan.FromSeconds((packetPerSecond > 0) ? 1.0 / packetPerSecond : 0.0));
         var outputInterval = new Interval(TimeSpan.FromSeconds(0.25));
